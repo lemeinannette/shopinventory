@@ -120,4 +120,3 @@ public class InventoryDatabase extends SQLiteOpenHelper {
         return productList;
     }
 }
-

@@ -1,3 +1,4 @@
+
 package com.example.shopinventory;
 
 import android.content.ContentValues;
@@ -31,7 +32,7 @@ public class SellProductActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sold_product);
+        setContentView(R.layout.activity_sell_product);
 
         productDropdown = findViewById(R.id.productDropdown);
         quantityInput = findViewById(R.id.quantityInput);
