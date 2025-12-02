@@ -37,10 +37,8 @@ public class RestockProductsActivity extends AppCompatActivity {
         btnBackHome.setOnClickListener(view -> finish());
     }
 
-    // ⭐ LOAD PRODUCTS INTO DROPDOWN
+    // LOAD PRODUCTS INTO DROPDOWN
     private void loadProductsIntoSpinner() {
-
-        // 🔥 FIXED: This should call a GET method, not addProducts()
         ArrayList<String> productNames = db.getAllProductNames();
 
         if (productNames.isEmpty()) {
@@ -56,12 +54,13 @@ public class RestockProductsActivity extends AppCompatActivity {
         spinnerProducts.setAdapter(adapter);
     }
 
-    // ⭐ RESTOCK FUNCTION
+    // ⭐ RESTOCK FUNCTION (FIXED)
     private void restockProduct() {
-        String product = spinnerProducts.getSelectedItem().toString();
+
+        String productFull = spinnerProducts.getSelectedItem().toString();
         String qtyString = productQuantity.getText().toString().trim();
 
-        if (product.equals("No products available")) {
+        if (productFull.equals("No products available")) {
             Toast.makeText(this, "No products to restock", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -73,11 +72,14 @@ public class RestockProductsActivity extends AppCompatActivity {
 
         int qty = Integer.parseInt(qtyString);
 
-        // 🔥 Update quantity in the database
-        boolean success = db.restockProduct(Integer.parseInt(product), qty);
+        // ✔ Extract ID before the " - "
+        String[] split = productFull.split(" - ");
+        int productId = Integer.parseInt(split[0]);  // <-- SAFE NOW
+
+        boolean success = db.restockProduct(productId, qty);
 
         if (success) {
-            Toast.makeText(this, "Restocked " + product + " by " + qty, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Restocked " + productFull + " by " + qty, Toast.LENGTH_SHORT).show();
             productQuantity.setText("");
         } else {
             Toast.makeText(this, "Failed to restock", Toast.LENGTH_SHORT).show();
