@@ -15,22 +15,79 @@ import java.util.ArrayList;
 public class Report extends AppCompatActivity {
 
     LinearLayout btnSalesTab, btnInventoryTab;
-    LinearLayout salesSection = findViewById(R.id.salesSection), inventorySection = findViewById(R.id.inventorySection);
+    LinearLayout salesSection, inventorySection;
 
-    // CORRECT
-    ListView salesListView, // CORRECT
-            inventoryListView;  // FIXED
+    ListView salesListView, inventoryListView;
     Spinner inventorySortSpinner;
 
     InventoryDatabase db;
 
-    @SuppressLint("WrongViewCast")
-    public Report() {
-        inventoryListView = findViewById(R.id.inventorySection);
-        salesListView = findViewById(R.id.salesSection);
+    @SuppressLint("MissingInflatedId")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_report);
+
+        // FIND VIEWS
+        btnSalesTab = findViewById(R.id.btnSalesTab);
+        btnInventoryTab = findViewById(R.id.btnInventoryTab);
+
+        salesSection = findViewById(R.id.salesSection);
+        inventorySection = findViewById(R.id.inventorySection);
+
+        inventorySortSpinner = findViewById(R.id.inventorySortSpinner);
+
+        // CREATE LISTVIEWS DYNAMICALLY
+        salesListView = new ListView(this);
+        inventoryListView = new ListView(this);
+
+        // Add listviews to layout
+        salesSection.addView(salesListView);
+        inventorySection.addView(inventoryListView);
+
+        db = new InventoryDatabase(this);
+
+        // Click handlers
+        btnSalesTab.setOnClickListener(v -> showSales());
+        btnInventoryTab.setOnClickListener(v -> showInventory());
+
+        // Default tab
+        showSales();
     }
 
-    // Product class for inventory
+    private void showSales() {
+        salesSection.setVisibility(View.VISIBLE);
+        inventorySection.setVisibility(View.GONE);
+
+        highlightTab(btnSalesTab, btnInventoryTab);
+
+        ArrayList<String> sales = db.getAllSales();
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sales);
+
+        salesListView.setAdapter(adapter);
+    }
+
+    private void showInventory() {
+        salesSection.setVisibility(View.GONE);
+        inventorySection.setVisibility(View.VISIBLE);
+
+        highlightTab(btnInventoryTab, btnSalesTab);
+
+        ArrayList<Report.Product> products = db.getAllProductsFull();
+
+        ArrayAdapter<Product> adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, products);
+
+        inventoryListView.setAdapter(adapter);
+    }
+
+    private void highlightTab(LinearLayout active, LinearLayout inactive) {
+        active.setBackgroundColor(0xFFDDDDDD); // active
+        inactive.setBackgroundColor(0x00000000); // transparent
+    }
+
     public static class Product {
         int id;
         String name;
@@ -48,71 +105,5 @@ public class Report extends AppCompatActivity {
         public String toString() {
             return name + " | Qty: " + quantity + " | $" + price;
         }
-    }
-
-    @SuppressLint("MissingInflatedId")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_report);
-
-        // -----------------------------
-        // FIND VIEWS — MATCH XML EXACTLY
-        // -----------------------------
-        btnSalesTab = findViewById(R.id.btnSalesTab);
-        btnInventoryTab = findViewById(R.id.btnInventoryTab);
-
-        inventorySortSpinner = findViewById(R.id.inventorySortSpinner);
-
-        db = new InventoryDatabase(this);
-
-        // TAB CLICK HANDLERS
-        btnSalesTab.setOnClickListener(v -> showSales());
-        btnInventoryTab.setOnClickListener(v -> showInventory());
-
-        // SHOW SALES FIRST
-        showSales();
-    }
-
-    // -----------------------------
-    // SHOW SALES TAB
-    // -----------------------------
-    private void showSales() {
-        salesSection.setVisibility(View.VISIBLE);
-        inventorySection.setVisibility(View.GONE);
-
-        highlightTab(btnSalesTab, btnInventoryTab);
-
-        ArrayList<String> sales = db.getAllSales();
-
-        ArrayAdapter<String> salesAdapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sales);
-
-        salesListView.setAdapter(salesAdapter);
-    }
-
-    // -----------------------------
-    // SHOW INVENTORY TAB
-    // -----------------------------
-    private void showInventory() {
-        salesSection.setVisibility(View.GONE);
-        inventorySection.setVisibility(View.VISIBLE);
-
-        highlightTab(btnInventoryTab, btnSalesTab);
-
-        ArrayList<Product> products = db.getAllProductsFull();
-
-        ArrayAdapter<Product> inventoryAdapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, products);
-
-        inventoryListView.setAdapter(inventoryAdapter);
-    }
-
-    // -----------------------------
-    // TAB HIGHLIGHT FUNCTION
-    // -----------------------------
-    private void highlightTab(LinearLayout active, LinearLayout inactive) {
-        active.setBackgroundColor(0xFFDDDDDD);     // light gray
-        inactive.setBackgroundColor(0x00000000);   // transparent
     }
 }
